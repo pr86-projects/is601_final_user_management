@@ -1,3 +1,15 @@
+# Issues fixed
+
+![image](https://github.com/pr86-projects/is601_final_user_management/assets/119285842/82d0ab26-6119-4834-9fd1-d8887725e358)
+
+# Pull Requests
+![image](https://github.com/pr86-projects/is601_final_user_management/assets/119285842/9fb4b51e-18f3-43ea-993e-c675e5b86d28)
+
+# GitHub workflows
+![image](https://github.com/pr86-projects/is601_final_user_management/assets/119285842/00c37e2b-5917-401d-bf42-254393be1882)
+
+# DockerHub
+![image](https://github.com/pr86-projects/is601_final_user_management/assets/119285842/039d99be-01f5-4ec7-83e5-670aa9e5acb5)
 
 
 # The User Management System Final Project: Your Epic Coding Adventure Awaits! 🎉✨🔥
