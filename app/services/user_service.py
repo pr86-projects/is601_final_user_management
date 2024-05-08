@@ -199,3 +199,25 @@ class UserService:
             await session.commit()
             return True
         return False
+    
+    @classmethod
+    async def change_user_role(cls, session: AsyncSession, user_id: int, new_role: str) -> bool:
+        "Administrator should be able to change a user role"
+        if new_role not in UserRole.__members__:
+            raise ValueError(f"Invalid role specified: {new_role}")
+
+        async with session.begin():
+            query = select(User).where(User.id == user_id)
+            result = await session.execute(query)
+            user = result.scalars().first()
+
+            if user is None:
+                raise NoResultFound("User not found")
+
+            user.role = UserRole[new_role]
+            session.add(user)
+            await session.commit()
+
+            logger.info(f"User role updated - User ID: {user_id}, New Role: {new_role}")
+            return True
+        

@@ -5,6 +5,7 @@ from app.dependencies import get_settings
 from app.models.user_model import User, UserRole
 from app.services.user_service import UserService
 from app.utils.nickname_gen import generate_nickname
+from sqlalchemy.ext.asyncio import AsyncSession
 
 pytestmark = pytest.mark.asyncio
 
@@ -161,3 +162,15 @@ async def test_unlock_user_account(db_session, locked_user):
     assert unlocked, "The account should be unlocked"
     refreshed_user = await UserService.get_by_id(db_session, locked_user.id)
     assert not refreshed_user.is_locked, "The user should no longer be locked"
+
+@pytest.mark.asyncio
+async def test_change_user_role(db_session: AsyncSession, user: User):
+    new_role = "MANAGER"
+    assert await UserService.change_user_role(db_session, user.id, new_role)
+    await db_session.refresh(user)
+    assert user.role == UserRole[new_role]
+
+@pytest.mark.asyncio
+async def test_change_user_role_invalid_role(db_session: AsyncSession, user: User):
+    with pytest.raises(ValueError):
+        await UserService.change_user_role(db_session, user.id, "InvalidRole")

@@ -245,3 +245,29 @@ async def verify_email(user_id: UUID, token: str, db: AsyncSession = Depends(get
     if await UserService.verify_email_with_token(db, user_id, token):
         return {"message": "Email verified successfully"}
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+
+@router.put("/users/{user_id}/role", tags=["User Management"])
+async def update_user_role(user_id: int, new_role: str, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Update the role of a user.
+
+    Args:
+        user_id (int): The ID of the user to update.
+        new_role (str): The new role to assign to the user.
+        db (AsyncSession, optional): The database session. Defaults to Depends(get_db).
+        current_user (dict, optional): The current user. Defaults to Depends(get_current_user).
+
+    Raises:
+        HTTPException: If the current user does not have sufficient permissions or if there is an error updating the user role.
+
+    Returns:
+        dict: A dictionary with a success message if the user role was updated successfully, or a failure message if the update failed.
+    """
+    if current_user['role'] not in ['ADMIN']:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+
+    try:
+        success = await UserService.change_user_role(db, user_id, new_role)
+        return {"message": "User role updated successfully"} if success else {"message": "Failed to update user role"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
