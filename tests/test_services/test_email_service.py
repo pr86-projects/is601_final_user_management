@@ -2,6 +2,7 @@ import asyncio
 import pytest
 from unittest.mock import AsyncMock
 from app.services.email_service import EmailService
+from app.utils.template_manager import TemplateManager
 
 @pytest.fixture
 def email_service():
@@ -55,3 +56,27 @@ async def test_send_email_without_side_effect(email_service):
         "verification_url": "http://example.com/verify?token=12345"
     }
     await email_service.send_user_email(user_data, 'email_verification')  # No exception should be raised
+
+@pytest.mark.asyncio
+async def test_send_email_invalid_address(email_service):
+    user_data = {
+        "name": "Test User",
+        "email": "invalid-email",
+        "verification_url": "http://example.com/verify?token=12345"
+    }
+    email_service.send_user_email.side_effect = ValueError("Invalid email address")
+    with pytest.raises(ValueError) as excinfo:
+        await email_service.send_user_email(user_data, 'email_verification')
+    assert "Invalid email address" in str(excinfo.value), "Service should validate email addresses."
+
+@pytest.mark.asyncio
+async def test_email_service_timeout(email_service):
+    email_service.send_user_email = AsyncMock(side_effect=asyncio.TimeoutError("Timeout occurred"))
+    user_data = {
+        "name": "Test User",
+        "email": "test@example.com",
+        "verification_url": "http://example.com/verify?token=12345"
+    }
+    with pytest.raises(asyncio.TimeoutError) as excinfo:
+        await email_service.send_user_email(user_data, 'email_verification')
+    assert "Timeout occurred" in str(excinfo.value), "Email service should handle timeouts gracefully."
